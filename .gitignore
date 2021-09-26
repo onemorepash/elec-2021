@@ -1,5 +1,6 @@
 data/*
 !data/.gitkeep
+!data/elec-duma-1-manade-moscow-votes-per-second.csv
 
 
 *.py[cod]
