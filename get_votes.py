@@ -13,7 +13,7 @@ DB_NAME = 'observer_20210921_143000'
 DB_USER = getpass.getuser()
 #DB_USER = 'pgsql' # put yourusername
 
-RESULT_CSV_FILENAME = './data/elec-duma-1-manade-moscow-votes-per-second.csv'
+RESULT_CSV_FILENAME = './data/elec-duma-1-mandate-moscow-votes-per-second.csv'
 
 LOCAL_TZ  = pytz.timezone('Europe/Moscow')
 
@@ -29,7 +29,7 @@ elections_end_time   = LOCAL_TZ.localize( elections_end_time )
 elec_duration = elections_end_time - elections_start_time
 elec_duration_seconds = elec_duration.days*24*3600 + elec_duration.seconds
 
-# Create resulting paandas dataframe
+# Create resulting pandas dataframe
 
 result_df = pandas.DataFrame()
 
@@ -53,7 +53,7 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
 
         # Iterate through districts
         for district in ballots_conf:
-            
+
             print ( "# District #", district["district_id"] )
 
             candidates = district["options"]
@@ -91,16 +91,16 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
 
                 print ( "#", candidate_id, candidates[candidate_id], len(votes_time) )
 
-                # Iterate through all votes for a given candidate and count number of votes for each given second
+                # Iterate through all votes for a given candidate and count number of votes for each 1-second interval of elections
                 for vote_t in votes_time:
                     # Counting the number of seconds between start and end timestamps
                     vote_time_shift = vote_t - elections_start_time
-                    vote_sec_idx    = vote_time_shift.days*24*3600 + vote_time_shift.seconds # The number of second since the elections start
+                    vote_sec_idx    = vote_time_shift.days*24*3600 + vote_time_shift.seconds # The number of seconds since the elections start
 
+                    # Increment the number of votes for the given second
                     votes_per_second[vote_sec_idx] = votes_per_second[vote_sec_idx] + 1
-                    #print ( vote_sec_idx, "\t", vote_t.astimezone( LOCAL_TZ  ).strftime('%Y %b %d %H:%M:%S.%f %Z') )
 
-                culumn_header = candidates[candidate_id] + ', округ ' + str( district["district_id"] ) 
+                culumn_header = candidates[candidate_id] + ', округ ' + str( district["district_id"] )
                 result_df[culumn_header] = votes_per_second
 
 result_df.to_csv(RESULT_CSV_FILENAME, index=False)
