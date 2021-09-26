@@ -1,0 +1,6 @@
+data/*
+!data/.gitkeep
+
+
+*.py[cod]
+__pycache__/
