@@ -1,6 +1,6 @@
 import psycopg2 as psycopg
 
-#import json
+import json
 
 from datetime import datetime, timedelta
 import pytz
@@ -14,6 +14,7 @@ DB_USER = getpass.getuser()
 #DB_USER = 'pgsql' # put yourusername
 
 RESULT_CSV_FILENAME = './data/elec-duma-1-mandate-moscow-votes-per-second.csv'
+BALLOTS_CONF_FILENAME = './data/ballots-conf-federal-duma-1-mandate-moscow.json'
 
 LOCAL_TZ  = pytz.timezone('Europe/Moscow')
 
@@ -49,7 +50,8 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
         # So the 0th element is of interest
         ballots_conf = ballots[0]["ballots_config"]
 
-        #print ( json.dumps(ballots_conf) )
+        with open(BALLOTS_CONF_FILENAME, 'w') as json_file:
+            json.dump(ballots_conf, json_file)
 
         # Iterate through districts
         for district in ballots_conf:
@@ -100,7 +102,7 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
                     # Increment the number of votes for the given second
                     votes_per_second[vote_sec_idx] = votes_per_second[vote_sec_idx] + 1
 
-                culumn_header = candidates[candidate_id] + ', округ ' + str( district["district_id"] )
+                culumn_header = candidates[candidate_id] + '. Округ ' + str( district["district_id"] )
                 result_df[culumn_header] = votes_per_second
 
 result_df.to_csv(RESULT_CSV_FILENAME, index=False)
