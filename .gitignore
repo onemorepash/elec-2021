@@ -1,7 +1,7 @@
 data/*
 !data/.gitkeep
 !data/elec-duma-1-mandate-moscow-votes-per-second.csv
-
+!data/ballots-conf-federal-duma-1-mandate-moscow.json
 
 *.py[cod]
 __pycache__/
