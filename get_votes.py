@@ -50,8 +50,8 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
         # So the 0th element is of interest
         ballots_conf = ballots[0]["ballots_config"]
 
-        with open(BALLOTS_CONF_FILENAME, 'w', encoding="utf-8") as json_file:
-            json.dump(ballots_conf, json_file)
+        with open(BALLOTS_CONF_FILENAME, 'w', encoding="utf8") as json_file:
+            json.dump(ballots_conf, json_file, ensure_ascii=False, indent=4)
 
         # Iterate through districts
         for district in ballots_conf:
