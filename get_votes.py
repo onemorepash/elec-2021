@@ -48,17 +48,26 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
 
         # Data from psql is a tuple, even if there is only one column
         # So the 0th element is of interest
-        elec_sumup = ballots[0]["ballots_config"]
+        ballots_conf = ballots[0]["ballots_config"]
+
+        elec_sumup = {}
 
         # Iterate through districts
-        for district in elec_sumup:
+        for district in ballots_conf:
 
             print ( "# District #", district["district_id"] )
+
+            elec_sumup["districts"][district["district_id"]] = {}
+            elec_sumup["districts"][district["district_id"]]["options"] = {}
 
             candidates = district["options"]
 
             # Iterate through candidates of the district
             for candidate_id in candidates:
+
+                elec_sumup["districts"][district["district_id"]]["options"][candidate_id] = {}
+
+                elec_sumup["districts"][district["district_id"]]["options"][candidate_id]["name"] = candidates[candidate_id]
 
                 # Intitalize an array of elec_duration_seconds elements = 0
                 # Each element will correspond to a second of elections duration
@@ -91,7 +100,6 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
                 print ( "#", candidate_id, candidates[candidate_id], len(votes_time) )
 
                 candidate_votes_count = 0
-                elec_sumup["results"] = {}
 
                 # Iterate through all votes for a given candidate and count number of votes for each 1-second interval of elections
                 for vote_t in votes_time:
@@ -107,8 +115,8 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
                 culumn_header = candidates[candidate_id] + '. Округ ' + str( district["district_id"] )
                 result_df[culumn_header] = votes_per_second
 
-                elec_sumup["results"][candidate_id] = candidate_votes_count
-
+                elec_sumup["districts"][district["district_id"]]["options"][candidate_id]["result"] = candidate_votes_count
+                
 with open(ELEC_SUMUP_FILENAME, 'w', encoding="utf8") as json_file:
     json.dump(elec_sumup, json_file, ensure_ascii=False, indent=4)
 
