@@ -14,7 +14,7 @@ DB_USER = getpass.getuser()
 #DB_USER = 'pgsql' # put yourusername
 
 RESULT_CSV_FILENAME = './data/elec-duma-1-mandate-moscow-votes-per-second.csv'
-BALLOTS_CONF_FILENAME = './data/ballots-conf-federal-duma-1-mandate-moscow.json'
+ELEC_SUMUP_FILENAME = './data/elec-sumup-federal-duma-1-mandate-moscow.json'
 
 LOCAL_TZ  = pytz.timezone('Europe/Moscow')
 
@@ -48,13 +48,10 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
 
         # Data from psql is a tuple, even if there is only one column
         # So the 0th element is of interest
-        ballots_conf = ballots[0]["ballots_config"]
-
-        with open(BALLOTS_CONF_FILENAME, 'w', encoding="utf8") as json_file:
-            json.dump(ballots_conf, json_file, ensure_ascii=False, indent=4)
+        elec_sumup = ballots[0]["elec_sumupig"]
 
         # Iterate through districts
-        for district in ballots_conf:
+        for district in elec_sumup:
 
             print ( "# District #", district["district_id"] )
 
@@ -93,6 +90,8 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
 
                 print ( "#", candidate_id, candidates[candidate_id], len(votes_time) )
 
+                candidate_votes_count = 0
+
                 # Iterate through all votes for a given candidate and count number of votes for each 1-second interval of elections
                 for vote_t in votes_time:
                     # Counting the number of seconds between start and end timestamps
@@ -102,7 +101,14 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
                     # Increment the number of votes for the given second
                     votes_per_second[vote_sec_idx] = votes_per_second[vote_sec_idx] + 1
 
+                    candidate_votes_count = candidate_votes_count + 1
+
                 culumn_header = candidates[candidate_id] + '. Округ ' + str( district["district_id"] )
                 result_df[culumn_header] = votes_per_second
+
+                elec_sumup["results"][str(candidate_id)] = candidate_votes_count
+
+with open(ELEC_SUMUP_FILENAME, 'w', encoding="utf8") as json_file:
+    json.dump(elec_sumup, json_file, ensure_ascii=False, indent=4)
 
 result_df.to_csv(RESULT_CSV_FILENAME, index=False)
