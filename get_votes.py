@@ -51,6 +51,7 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
         ballots_conf = ballots[0]["ballots_config"]
 
         elec_sumup = {}
+        elec_sumup["districts"] = {}
 
         # Iterate through districts
         for district in ballots_conf:
