@@ -63,6 +63,8 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
 
             candidates = district["options"]
 
+            elec_sumup["districts"][district["district_id"]]["total_votes"] = 0
+
             # Iterate through candidates of the district
             for candidate_id in candidates:
 
@@ -100,8 +102,6 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
 
                 print ( "#", candidate_id, candidates[candidate_id], len(votes_time) )
 
-                candidate_votes_count = 0
-
                 # Iterate through all votes for a given candidate and count number of votes for each 1-second interval of elections
                 for vote_t in votes_time:
                     # Counting the number of seconds between start and end timestamps
@@ -116,8 +116,9 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
                 culumn_header = candidates[candidate_id] + '. Округ ' + str( district["district_id"] )
                 result_df[culumn_header] = votes_per_second
 
-                elec_sumup["districts"][district["district_id"]]["options"][candidate_id]["result"] = candidate_votes_count
-                
+                elec_sumup["districts"][district["district_id"]]["options"][candidate_id]["result"] = len(votes_time)
+                elec_sumup["districts"][district["district_id"]]["total_votes"] = elec_sumup["districts"][district["district_id"]]["total_votes"] + len(votes_time)
+
 with open(ELEC_SUMUP_FILENAME, 'w', encoding="utf8") as json_file:
     json.dump(elec_sumup, json_file, ensure_ascii=False, indent=4)
 
