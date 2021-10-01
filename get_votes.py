@@ -48,7 +48,7 @@ with psycopg.connect("dbname=" + DB_NAME + " user=" + DB_USER) as psql_conn:
 
         # Data from psql is a tuple, even if there is only one column
         # So the 0th element is of interest
-        elec_sumup = ballots[0]["ballots_conf"]
+        elec_sumup = ballots[0]["ballots_config"]
 
         # Iterate through districts
         for district in elec_sumup:
